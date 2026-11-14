@@ -1,0 +1,162 @@
+create database student;
+
+use student;
+
+CREATE TABLE Student (
+	Sno char (10) PRIMARY KEY  ,
+	Sname char (20)  NOT NULL ,
+	Ssex char (10)  ,
+	Sage tinyint  ,
+	Sdept char (20) 
+);
+
+CREATE TABLE Course (
+	Cno char (10) PRIMARY KEY ,
+	Cname char (20)  NOT NULL ,
+	Ccredit tinyint  ,
+	Semester tinyint  
+);
+
+CREATE TABLE sc (
+	sno char (10) NOT NULL ,
+	cno char (10) NOT NULL ,
+	mark smallint  ,
+	c_type char (10)  ,
+	PRIMARY KEY(sno,cno),
+	CHECK (mark >= 0 and mark <= 100)
+);
+
+
+
+insert student values('9512101','Li Yong','male',19,'CS');
+insert student values('9512102','Liu Chen','male',20,'CS');
+insert student values('9512103','Wang Min','female',20,'CS');
+insert student values('9521101','Zhang Li','male',22,'IS');
+insert student values('9521103','Zhang Hai','male',20,'IS');
+insert student values('9521104','Li Shan','female',19,'IS');
+insert student values('9531101','Qian Xiaoping','female',18,'MA');
+insert student values('9531102','Wang Dali','male',19,'MA')	;
+
+insert course values('c01','Computer literature',3,1);
+insert course values('c02','VB',2,3);
+insert course values('c03','Computer network',4,7);
+insert course values('c04','Database',6,6);
+insert course values('c05','Higher math',8,2);
+insert course values('c06','Data structure',5,4);
+
+insert sc values('9512101','c01',90,'compulsory');
+insert sc values('9512101','c02',86,'optional');
+insert sc values('9512101','c06',NULL,'compulsory');
+insert sc values('9512102','c02',78,'optional');
+insert sc values('9512102','c04',66,'compulsory');
+insert sc values('9521102','c01',82,'optional');
+insert sc values('9521102','c02',75,'optional');
+insert sc values('9521102','c04',92,'compulsory');
+insert sc values('9521102','c05',50,'compulsory');
+insert sc values('9521103','c02',68,'optional');
+insert sc values('9521103','c06',NULL,'compulsory');
+insert sc values('9521104','c01',90,'compulsory');
+insert sc values('9531101','c01',80,'optional');
+insert sc values('9531101','c05',95,'compulsory');
+insert sc values('9531102','c05',85,'compulsory');
+
+
+
+create table c_volumn
+(
+cno  char (10) primary key,
+cname char (20),
+currentStrength int
+);
+
+
+insert into c_volumn values ('c01','Computer literature', 4);
+insert into c_volumn values ('c02','VB', 4);
+insert into c_volumn values ('c03','Java', 0);
+insert into c_volumn values ('c04','Database', 2);
+insert into c_volumn values ('c05','Higher math', 3);
+insert into c_volumn values ('c06','Data structure', 2);
+
+select * from Student
+where Sname like 'Liu%';
+
+select * from Student 
+where Ssex = 'male' and Sage < 20;
+
+select * from Student
+where Sname like '%xiao%';
+
+select * from Student
+where Sage between 20 and 21;
+
+select * from Student
+where Sdept in ('IS','MA');
+
+select Sname , Sno , year(curdate()) - Sage AS birth_year
+from Student ;
+
+select count(Sno) as total_number_student
+from Student ;
+
+SELECT 
+    cno AS course_id, 
+    AVG(mark) AS average_score, 
+    COUNT(sno) AS number_of_students
+FROM sc
+GROUP BY cno;
+
+
+SELECT sno AS student_id
+FROM sc
+GROUP BY sno
+HAVING AVG(mark) > 80;
+
+
+SELECT 
+    Student.Sno AS student_id, 
+    Student.Sname AS student_name, 
+    sc.cno AS course_id, 
+    sc.mark AS score
+FROM Student
+LEFT JOIN sc ON Student.Sno = sc.sno;
+
+
+SELECT 
+    Student.Sname AS student_name, 
+    sc.cno AS course_id, 
+    sc.mark AS score
+FROM Student
+JOIN sc ON Student.Sno = sc.sno
+WHERE Student.Sdept = 'CS';
+
+
+SELECT 
+    Student.Sname AS student_name, 
+    Course.Cname AS course_name, 
+    sc.mark AS score
+FROM Student
+JOIN sc ON Student.Sno = sc.sno
+JOIN Course ON sc.cno = Course.Cno
+WHERE Student.Sdept = 'IS' AND Course.Cname = 'VB';
+
+SELECT 
+    Student.Sname AS student_name, 
+    Student.Sdept AS department
+FROM Student
+JOIN sc ON Student.Sno = sc.sno
+JOIN Course ON sc.cno = Course.Cno
+WHERE Course.Cname = 'VB';
+
+SELECT Sname AS student_name, Sdept AS department
+FROM Student
+WHERE Sdept = (
+    SELECT Sdept 
+    FROM Student 
+    WHERE Sname = 'Zhang Hai'
+) 
+AND Sname != 'Zhang Hai';
+
+
+SELECT AVG(mark) 
+FROM sc 
+WHERE sno IN (SELECT Sno FROM Student WHERE Sdept = 'MA');
